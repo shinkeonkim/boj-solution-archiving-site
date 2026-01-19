@@ -57,29 +57,39 @@
         const solvedMap = {{ solved_map | tojson }};
         const MIN_ID = 1000;
         const MAX_ID = 40000;
-        const COLUMNS = 100; // Number of columns in the grid
+
         const CELL_SIZE = 10;
         const CELL_GAP = 2;
-        const TOTAL_WIDTH = COLUMNS * (CELL_SIZE + CELL_GAP);
-
-        // Calculate rows needed
         const totalItems = MAX_ID - MIN_ID + 1;
-        const ROWS = Math.ceil(totalItems / COLUMNS);
-        const TOTAL_HEIGHT = ROWS * (CELL_SIZE + CELL_GAP);
-
-        const canvas = document.getElementById('grassCanvas');
-        const ctx = canvas.getContext('2d');
-        const tooltip = document.getElementById('tooltip');
-
-        // Set canvas size
-        canvas.width = TOTAL_WIDTH;
-        canvas.height = TOTAL_HEIGHT;
-        canvas.style.width = "100%"; // Responsive scaling in CSS
-        // canvas.style.maxWidth = TOTAL_WIDTH + "px"; // Optional limitation
 
         // Colors
         const COLOR_EMPTY = 'rgba(255, 255, 255, 0.05)';
         const COLOR_SOLVED = '#03dac6'; // Teal for solved
+
+        const canvas = document.getElementById('grassCanvas');
+        const ctx = canvas.getContext('2d');
+        const tooltip = document.getElementById('tooltip');
+        const container = document.querySelector('.glass-card'); // Parent container
+
+        let COLUMNS = 100;
+        let ROWS = 0;
+
+        function resizeCanvas() {
+            // Calculate columns based on available width
+            const availableWidth = container.clientWidth - 40; // minus padding
+            COLUMNS = Math.floor(availableWidth / (CELL_SIZE + CELL_GAP));
+            if (COLUMNS < 20) COLUMNS = 20; // Min columns
+
+            ROWS = Math.ceil(totalItems / COLUMNS);
+
+            const totalHeight = ROWS * (CELL_SIZE + CELL_GAP);
+
+            canvas.width = COLUMNS * (CELL_SIZE + CELL_GAP);
+            canvas.height = totalHeight;
+
+            // Redraw
+            draw();
+        }
 
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -99,8 +109,8 @@
 
         // Handle Interactions
         function getProblemFromCoords(x, y) {
-            // Adjust for CSS scaling if necessary (using getBoundingClientRect)
             const rect = canvas.getBoundingClientRect();
+            // Since we set canvas.width explicitly, scale is 1:1 usually, but good to handle
             const scaleX = canvas.width / rect.width;
             const scaleY = canvas.height / rect.height;
 
@@ -153,7 +163,9 @@
             tooltip.style.display = 'none';
         });
 
-        draw();
+        // Initialize
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas(); // First draw
 
     </script>
 </body>

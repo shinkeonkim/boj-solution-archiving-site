@@ -76,32 +76,37 @@
             {% if problems %}
             <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
                 <thead>
-                    <tr style="text-align: left; border-bottom: 1px solid var(--glass-border);">
-                        <th style="padding: 1rem;">ID</th>
-                        <th style="padding: 1rem;">Title</th>
-                        <th style="padding: 1rem;">Solutions</th>
-                        <th style="padding: 1rem;">Actions</th>
+                    <tr>
+                        <th style="text-align: left; padding: 1rem;">Problem</th>
+                        <th style="text-align: left; padding: 1rem;">Languages</th>
+                        <th style="text-align: right; padding: 1rem;">View</th>
+                        {% if is_admin %}
+                        <th style="text-align: right; padding: 1rem;">Admin</th>
+                        {% endif %}
                     </tr>
                 </thead>
                 <tbody>
-                    {% for problem in problems %}
-                    <tr style="border-bottom: 1px solid var(--glass-border); transition: background 0.2s;"
+                    {% for p in problems %}
+                    <tr class="problem-row"
+                        style="border-bottom: 1px solid var(--glass-border); transition: background 0.2s;"
                         onmouseover="this.style.background='rgba(255,255,255,0.05)'"
                         onmouseout="this.style.background='transparent'">
-                        <td style="padding: 1rem; font-weight: bold;">{{ problem.id }}</td>
-                        <td style="padding: 1rem;">{{ problem.title }}</td>
                         <td style="padding: 1rem;">
-                            <span style="opacity: 0.7;">{{ problem.solutions|length }} solutions</span>
-                            <div
-                                style="font-size: 0.8rem; margin-top: 0.2rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                                {% for sol in problem.solutions %}
+                            <a href="https://www.acmicpc.net/problem/{{ p.id }}" target="_blank"
+                                style="color: var(--text-color); font-weight: 600; text-decoration: none; border-bottom: 1px dashed var(--glass-border);">
+                                {{ p.id }}번: {{ p.title }} &nearr;
+                            </a>
+                        </td>
+                        <td style="padding: 1rem;">
+                            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                                {% for sol in p.solutions %}
                                 <span style="background: var(--glass-border); padding: 2px 6px; border-radius: 4px;">{{
                                     sol.language }}</span>
                                 {% endfor %}
                             </div>
                         </td>
-                        <td style="padding: 1rem;">
-                            <a href="/problem/{{ problem.id }}" class="btn"
+                        <td style="padding: 1rem; text-align: right;">
+                            <a href="/problem/{{ p.id }}" class="btn"
                                 style="padding: 4px 12px; font-size: 0.9rem;">View</a>
                         </td>
                     </tr>
