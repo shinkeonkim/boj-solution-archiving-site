@@ -1,173 +1,170 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Problem Grass - BOJ Archive</title>
-    <link rel="stylesheet" href="/static/style.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>
-        .container {
-            max-width: 1200px;
-        }
+{% block title %}Problem Grass - BOJ Archive{% endblock %}
 
-        #tooltip {
-            position: absolute;
-            background: rgba(0, 0, 0, 0.8);
-            color: #fff;
-            padding: 5px 10px;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            pointer-events: none;
-            display: none;
-            z-index: 1000;
-            border: 1px solid var(--primary-color);
-        }
-    </style>
-</head>
+{% block head_extra %}
+<style>
+    .container {
+        max-width: 1200px;
+    }
 
-<body>
-    <div class="container">
-        <header class="header">
-            <div>
-                <a href="/" style="font-size: 0.9rem; opacity: 0.7;">&larr; Back to List</a>
-                <h1 style="margin-top: 0.5rem; margin-bottom: 0;">Problem Grass</h1>
-                <p style="margin: 0; opacity: 0.8;">Visualization of Solved Problems (1000 ~ 40000)</p>
-            </div>
+    #tooltip {
+        position: absolute;
+        background: rgba(0, 0, 0, 0.8);
+        color: #fff;
+        padding: 5px 10px;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        pointer-events: none;
+        display: none;
+        z-index: 1000;
+        border: 1px solid var(--primary-color);
+    }
+</style>
+{% endblock %}
 
-            {% if is_admin %}
-            <div
-                style="background: rgba(187, 134, 252, 0.1); padding: 0.5rem 1rem; border-radius: 8px; border: 1px solid var(--primary-color);">
-                Admin Mode
-            </div>
-            {% endif %}
-        </header>
-
-        <div class="glass-card" style="padding: 1rem; overflow-x: auto;">
-            <canvas id="grassCanvas"></canvas>
-        </div>
+{% block header %}
+<header class="header">
+    <div>
+        <a href="/" style="font-size: 0.9rem; opacity: 0.7;">&larr; Back to List</a>
+        <h1 style="margin-top: 0.5rem; margin-bottom: 0;">Problem Grass</h1>
+        <p style="margin: 0; opacity: 0.8;">Visualization of Solved Problems (1000 ~ 40000)</p>
     </div>
 
-    <!-- Tooltip -->
-    <div id="tooltip"></div>
+    {% if is_admin %}
+    <div
+        style="background: rgba(187, 134, 252, 0.1); padding: 0.5rem 1rem; border-radius: 8px; border: 1px solid var(--primary-color);">
+        Admin Mode
+    </div>
+    {% endif %}
+</header>
+{% endblock %}
 
-    <script>
-        const solvedMap = {{ solved_map | tojson }};
-        const MIN_ID = 1000;
-        const MAX_ID = 40000;
+{% block content %}
+<div class="glass-card" style="padding: 1rem; overflow-x: auto;">
+    <canvas id="grassCanvas"></canvas>
+</div>
+{% endblock %}
 
-        const CELL_SIZE = 10;
-        const CELL_GAP = 2;
-        const totalItems = MAX_ID - MIN_ID + 1;
+{% block body_extra %}
+<!-- Tooltip -->
+<div id="tooltip"></div>
+{% endblock %}
 
-        // Colors
-        const COLOR_EMPTY = 'rgba(255, 255, 255, 0.05)';
-        const COLOR_SOLVED = '#03dac6'; // Teal for solved
+{% block scripts %}
+<script>
+    const solvedMap = {{ solved_map | tojson }};
+    const MIN_ID = 1000;
+    const MAX_ID = 40000;
 
-        const canvas = document.getElementById('grassCanvas');
-        const ctx = canvas.getContext('2d');
-        const tooltip = document.getElementById('tooltip');
-        const container = document.querySelector('.glass-card'); // Parent container
+    const CELL_SIZE = 10;
+    const CELL_GAP = 2;
+    const totalItems = MAX_ID - MIN_ID + 1;
 
-        let COLUMNS = 100;
-        let ROWS = 0;
+    // Colors
+    const COLOR_EMPTY = 'rgba(255, 255, 255, 0.05)';
+    const COLOR_SOLVED = '#03dac6'; // Teal for solved
 
-        function resizeCanvas() {
-            // Calculate columns based on available width
-            const availableWidth = container.clientWidth - 40; // minus padding
-            COLUMNS = Math.floor(availableWidth / (CELL_SIZE + CELL_GAP));
-            if (COLUMNS < 20) COLUMNS = 20; // Min columns
+    const canvas = document.getElementById('grassCanvas');
+    const ctx = canvas.getContext('2d');
+    const tooltip = document.getElementById('tooltip');
+    const container = document.querySelector('.glass-card'); // Parent container
 
-            ROWS = Math.ceil(totalItems / COLUMNS);
+    let COLUMNS = 100;
+    let ROWS = 0;
 
-            const totalHeight = ROWS * (CELL_SIZE + CELL_GAP);
+    function resizeCanvas() {
+        // Calculate columns based on available width
+        const availableWidth = container.clientWidth - 40; // minus padding
+        COLUMNS = Math.floor(availableWidth / (CELL_SIZE + CELL_GAP));
+        if (COLUMNS < 20) COLUMNS = 20; // Min columns
 
-            canvas.width = COLUMNS * (CELL_SIZE + CELL_GAP);
-            canvas.height = totalHeight;
+        ROWS = Math.ceil(totalItems / COLUMNS);
 
-            // Redraw
-            draw();
+        const totalHeight = ROWS * (CELL_SIZE + CELL_GAP);
+
+        canvas.width = COLUMNS * (CELL_SIZE + CELL_GAP);
+        canvas.height = totalHeight;
+
+        // Redraw
+        draw();
+    }
+
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        for (let i = 0; i < totalItems; i++) {
+            const pid = MIN_ID + i;
+            const row = Math.floor(i / COLUMNS);
+            const col = i % COLUMNS;
+
+            const x = col * (CELL_SIZE + CELL_GAP);
+            const y = row * (CELL_SIZE + CELL_GAP);
+
+            ctx.fillStyle = solvedMap[pid] ? COLOR_SOLVED : COLOR_EMPTY;
+            ctx.fillRect(x, y, CELL_SIZE, CELL_SIZE);
         }
+    }
 
-        function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // Handle Interactions
+    function getProblemFromCoords(x, y) {
+        const rect = canvas.getBoundingClientRect();
+        // Since we set canvas.width explicitly, scale is 1:1 usually, but good to handle
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
 
-            for (let i = 0; i < totalItems; i++) {
-                const pid = MIN_ID + i;
-                const row = Math.floor(i / COLUMNS);
-                const col = i % COLUMNS;
+        const canvasX = (x - rect.left) * scaleX;
+        const canvasY = (y - rect.top) * scaleY;
 
-                const x = col * (CELL_SIZE + CELL_GAP);
-                const y = row * (CELL_SIZE + CELL_GAP);
+        const col = Math.floor(canvasX / (CELL_SIZE + CELL_GAP));
+        const row = Math.floor(canvasY / (CELL_SIZE + CELL_GAP));
 
-                ctx.fillStyle = solvedMap[pid] ? COLOR_SOLVED : COLOR_EMPTY;
-                ctx.fillRect(x, y, CELL_SIZE, CELL_SIZE);
-            }
-        }
+        if (col < 0 || col >= COLUMNS || row < 0 || row >= ROWS) return null;
 
-        // Handle Interactions
-        function getProblemFromCoords(x, y) {
-            const rect = canvas.getBoundingClientRect();
-            // Since we set canvas.width explicitly, scale is 1:1 usually, but good to handle
-            const scaleX = canvas.width / rect.width;
-            const scaleY = canvas.height / rect.height;
+        const index = row * COLUMNS + col;
+        const pid = MIN_ID + index;
 
-            const canvasX = (x - rect.left) * scaleX;
-            const canvasY = (y - rect.top) * scaleY;
+        if (pid > MAX_ID) return null;
 
-            const col = Math.floor(canvasX / (CELL_SIZE + CELL_GAP));
-            const row = Math.floor(canvasY / (CELL_SIZE + CELL_GAP));
+        return pid;
+    }
 
-            if (col < 0 || col >= COLUMNS || row < 0 || row >= ROWS) return null;
+    canvas.addEventListener('mousemove', (e) => {
+        const pid = getProblemFromCoords(e.clientX, e.clientY);
 
-            const index = row * COLUMNS + col;
-            const pid = MIN_ID + index;
+        if (pid) {
+            const title = solvedMap[pid];
+            tooltip.style.display = 'block';
+            tooltip.style.left = (e.pageX + 10) + 'px';
+            tooltip.style.top = (e.pageY + 10) + 'px';
 
-            if (pid > MAX_ID) return null;
-
-            return pid;
-        }
-
-        canvas.addEventListener('mousemove', (e) => {
-            const pid = getProblemFromCoords(e.clientX, e.clientY);
-
-            if (pid) {
-                const title = solvedMap[pid];
-                tooltip.style.display = 'block';
-                tooltip.style.left = (e.pageX + 10) + 'px';
-                tooltip.style.top = (e.pageY + 10) + 'px';
-
-                if (title) {
-                    tooltip.innerHTML = `<strong>${pid}</strong><br>${title}`;
-                    canvas.style.cursor = 'pointer';
-                } else {
-                    tooltip.innerHTML = `<strong>${pid}</strong>`;
-                    canvas.style.cursor = 'default';
-                }
+            if (title) {
+                tooltip.innerHTML = `<strong>${pid}</strong><br>${title}`;
+                canvas.style.cursor = 'pointer';
             } else {
-                tooltip.style.display = 'none';
+                tooltip.innerHTML = `<strong>${pid}</strong>`;
                 canvas.style.cursor = 'default';
             }
-        });
-
-        canvas.addEventListener('click', (e) => {
-            const pid = getProblemFromCoords(e.clientX, e.clientY);
-            if (pid && solvedMap[pid]) {
-                window.location.href = `/problem/${pid}`;
-            }
-        });
-
-        canvas.addEventListener('mouseleave', () => {
+        } else {
             tooltip.style.display = 'none';
-        });
+            canvas.style.cursor = 'default';
+        }
+    });
 
-        // Initialize
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas(); // First draw
+    canvas.addEventListener('click', (e) => {
+        const pid = getProblemFromCoords(e.clientX, e.clientY);
+        if (pid && solvedMap[pid]) {
+            window.location.href = `/problem/${pid}`;
+        }
+    });
 
-    </script>
-</body>
+    canvas.addEventListener('mouseleave', () => {
+        tooltip.style.display = 'none';
+    });
 
-</html>
+    // Initialize
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas(); // First draw
+
+</script>
+{% endblock %}

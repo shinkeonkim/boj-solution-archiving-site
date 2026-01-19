@@ -1,26 +1,33 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Login - BOJ Archive</title>
-    <link rel="stylesheet" href="/static/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-</head>
+{% block title %}Admin Login - BOJ Archive{% endblock %}
 
-<body style="display:flex; justify-content:center; align-items:center;">
-    <div class="glass-card" style="width: 350px; text-align: center;">
-        <h2>Admin Login</h2>
-        {% if error %}
-        <p style="color: #cf6679; margin-bottom: 1rem;">{{ error }}</p>
-        {% endif %}
-        <form action="/admin/login" method="post">
-            <input type="password" name="password" placeholder="Password" required style="margin-bottom: 1.5rem;">
-            <button type="submit" class="btn" style="width: 100%;">Login</button>
-        </form>
-        <p style="margin-top: 1rem;"><a href="/">Back to Home</a></p>
-    </div>
-</body>
+{% block head_extra %}
+<style>
+    body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+    }
+</style>
+{% endblock %}
 
-</html>
+{% block header %}{% endblock %}
+
+{% block container_class %}login-container{% endblock %}
+
+{% block content %}
+<div class="glass-card" style="width: 350px; text-align: center; margin: 0 auto;">
+    <h2>Admin Login</h2>
+    {% if error %}
+    <p style="color: #cf6679; margin-bottom: 1rem;">{{ error }}</p>
+    {% endif %}
+    <form action="/admin/login" method="post">
+        <input type="password" name="password" placeholder="Password" required style="margin-bottom: 1.5rem;">
+        <button type="submit" class="btn" style="width: 100%;">Login</button>
+    </form>
+    <p style="margin-top: 1rem;"><a href="/">Back to Home</a></p>
+</div>
+{% endblock %}

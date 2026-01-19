@@ -1,165 +1,155 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Problem {{ problem.id }} - BOJ Archive</title>
-    <link rel="stylesheet" href="/static/style.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
-    <!-- EasyMDE -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css">
-</head>
+{% block title %}Problem {{ problem.id }} - BOJ Archive{% endblock %}
 
-<body>
-    <div class="container">
-        <header class="header">
-            <div>
-                <a href="/" style="font-size: 0.9rem; opacity: 0.7;">&larr; Back to List</a>
-                <h1 style="margin-top: 0.5rem; margin-bottom: 0;">
-                    <a href="https://www.acmicpc.net/problem/{{ problem.id }}" target="_blank"
-                        style="color: var(--text-color); text-decoration: none; border-bottom: 1px dashed var(--glass-border);">
-                        {{ problem.id }}번: {{ problem.title }} &nearr;
-                    </a>
-                </h1>
-            </div>
-            {% if is_admin %}
-            <div
-                style="background: rgba(187, 134, 252, 0.1); padding: 0.5rem 1rem; border-radius: 8px; border: 1px solid var(--primary-color);">
-                Admin Mode
-            </div>
-            {% endif %}
-        </header>
+{% block head_extra %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+<!-- EasyMDE -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css">
+{% endblock %}
 
-        <div class="glass-card">
-            <h2>Solutions</h2>
-            {% if solutions %}
-            <div class="tab-container">
-                {% for sol in solutions %}
-                <div class="tab {% if loop.first %}active{% endif %}" onclick="openTab(event, 'sol-{{ sol.id }}')">
-                    {{ sol.language }}
-                </div>
-                {% endfor %}
-            </div>
+{% block header %}
+<header class="header">
+    <div>
+        <a href="/" style="font-size: 0.9rem; opacity: 0.7;">&larr; Back to List</a>
+        <h1 style="margin-top: 0.5rem; margin-bottom: 0;">
+            <a href="https://www.acmicpc.net/problem/{{ problem.id }}" target="_blank"
+                style="color: var(--text-color); text-decoration: none; border-bottom: 1px dashed var(--glass-border);">
+                {{ problem.id }}번: {{ problem.title }} &nearr;
+            </a>
+        </h1>
+    </div>
+    {% if is_admin %}
+    <div
+        style="background: rgba(187, 134, 252, 0.1); padding: 0.5rem 1rem; border-radius: 8px; border: 1px solid var(--primary-color);">
+        Admin Mode
+    </div>
+    {% endif %}
+</header>
+{% endblock %}
 
-            {% for sol in solutions %}
-            <div id="sol-{{ sol.id }}" class="code-viewer"
-                style="display: {% if loop.first %}block{% else %}none{% endif %};">
-
-                {% if is_admin %}
-                <div
-                    style="margin-bottom: 0.5rem; text-align: right; display: flex; justify-content: flex-end; gap: 0.5rem;">
-                    <button class="btn" style="padding: 2px 8px; font-size: 0.8rem;"
-                        onclick="toggleEdit('edit-{{ sol.id }}')">Edit Code</button>
-                    <form action="/admin/solution/{{ sol.id }}/delete" method="post" style="display:inline;"
-                        onsubmit="return confirm('Are you sure you want to delete this solution? This cannot be undone.');">
-                        <button type="submit" class="btn"
-                            style="padding: 2px 8px; font-size: 0.8rem; background: rgba(220, 53, 69, 0.2); border: 1px solid #dc3545; color: #ff6b6b;">Delete</button>
-                    </form>
-                </div>
-                <div id="edit-{{ sol.id }}" style="display: none; margin-bottom: 1rem;">
-                    <form action="/problem/{{ problem.id }}/solution/{{ sol.id }}/edit" method="post">
-                        <textarea name="code_content"
-                            style="min-height: 300px; font-family: monospace; width: 100%; background: rgba(0,0,0,0.3); color: var(--text-color); border: 1px solid var(--glass-border); padding: 1rem; border-radius: 8px;">{{ sol.code }}</textarea>
-                        <div style="text-align: right; margin-top: 0.5rem;">
-                            <button type="submit" class="btn">Save Changes</button>
-                            <button type="button" class="btn" onclick="toggleEdit('edit-{{ sol.id }}')"
-                                style="background: transparent; border: 1px solid var(--glass-border); color: #fff;">Cancel</button>
-                        </div>
-                    </form>
-                </div>
-                {% endif %}
-
-                <div style="margin-bottom: 0.5rem; opacity: 0.6; font-size: 0.85rem; text-align: right;">
-                    {{ sol.byte_str }} | {{ sol.char_count }} chars
-                </div>
-
-                <pre><code class="language-{{ sol.prism_lang }}">{{ sol.code }}</code></pre>
-            </div>
-            {% endfor %}
-            {% else %}
-            <p style="opacity: 0.7;">No solutions archived yet.</p>
-            {% endif %}
+{% block content %}
+<div class="glass-card">
+    <h2>Solutions</h2>
+    {% if solutions %}
+    <div class="tab-container">
+        {% for sol in solutions %}
+        <div class="tab {% if loop.first %}active{% endif %}" onclick="openTab(event, 'sol-{{ sol.id }}')">
+            {{ sol.language }}
         </div>
-
-        {% if memo_content or is_admin %}
-        <div class="glass-card">
-            <h2>Memo</h2>
-            <!-- Display Mode -->
-            {% if memo_content %}
-            <div id="memo-display"
-                style="padding: 1rem; background: rgba(0,0,0,0.2); border-radius: 8px; margin-bottom: 1rem; min-height: 50px;">
-                <!-- Rendered Markdown will go here -->
-            </div>
-            {% endif %}
-
-            <!-- Edit Mode (Admin Only) -->
-            {% if is_admin %}
-            <h3 style="margin-top: 2rem;">{% if memo_content %}Edit Memo{% else %}Add Memo{% endif %}</h3>
-            <form action="/problem/{{ problem.id }}/memo" method="post">
-                <textarea id="memo-editor" name="content">{{ memo_content }}</textarea>
-                <div style="text-align: right; margin-top: 1rem;">
-                    <button type="submit" class="btn">Save Memo</button>
-                </div>
-            </form>
-            {% endif %}
-        </div>
-        {% endif %}
+        {% endfor %}
     </div>
 
-    <!-- Scripts -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
-    <script
-        src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    {% if is_admin %}
-    <script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
-    {% endif %}
-
-    <script>
-        // Tab Logic
-        function openTab(evt, tabId) {
-            var i, x, tablinks;
-            x = document.getElementsByClassName("code-viewer");
-            for (i = 0; i < x.length; i++) {
-                x[i].style.display = "none";
-            }
-            tablinks = document.getElementsByClassName("tab");
-            for (i = 0; i < tablinks.length; i++) {
-                tablinks[i].className = tablinks[i].className.replace(" active", "");
-            }
-            document.getElementById(tabId).style.display = "block";
-            evt.currentTarget.className += " active";
-        }
-
-        function toggleEdit(id) {
-            var x = document.getElementById(id);
-            if (x.style.display === "none") {
-                x.style.display = "block";
-            } else {
-                x.style.display = "none";
-            }
-        }
-
-        // Render Markdown for Display
-        const rawMemo = `{{ memo_content|safe }}`; // Be careful with escaping, but jinja2 safe might be needed if raw content
-        // Better to read valid text. For passing multiline string to JS, let's use a hidden div.
-    </script>
-
-    <!-- Hidden div to transfer data safely -->
-    <div id="raw-memo-content" style="display:none;">{{ memo_content }}</div>
-
-    <script>
-        const rawContent = document.getElementById('raw-memo-content').textContent;
-        document.getElementById('memo-display').innerHTML = marked.parse(rawContent);
+    {% for sol in solutions %}
+    <div id="sol-{{ sol.id }}" class="code-viewer" style="display: {% if loop.first %}block{% else %}none{% endif %};">
 
         {% if is_admin %}
-        // Initialize EasyMDE
-        const easyMDE = new EasyMDE({ element: document.getElementById('memo-editor') });
+        <div style="margin-bottom: 0.5rem; text-align: right; display: flex; justify-content: flex-end; gap: 0.5rem;">
+            <button class="btn" style="padding: 2px 8px; font-size: 0.8rem;" onclick="toggleEdit('edit-{{ sol.id }}')">Edit
+                Code</button>
+            <form action="/admin/solution/{{ sol.id }}/delete" method="post" style="display:inline;"
+                onsubmit="return confirm('Are you sure you want to delete this solution? This cannot be undone.');">
+                <button type="submit" class="btn"
+                    style="padding: 2px 8px; font-size: 0.8rem; background: rgba(220, 53, 69, 0.2); border: 1px solid #dc3545; color: #ff6b6b;">Delete</button>
+            </form>
+        </div>
+        <div id="edit-{{ sol.id }}" style="display: none; margin-bottom: 1rem;">
+            <form action="/problem/{{ problem.id }}/solution/{{ sol.id }}/edit" method="post">
+                <textarea name="code_content"
+                    style="min-height: 300px; font-family: monospace; width: 100%; background: rgba(0,0,0,0.3); color: var(--text-color); border: 1px solid var(--glass-border); padding: 1rem; border-radius: 8px;">{{ sol.code }}</textarea>
+                <div style="text-align: right; margin-top: 0.5rem;">
+                    <button type="submit" class="btn">Save Changes</button>
+                    <button type="button" class="btn" onclick="toggleEdit('edit-{{ sol.id }}')"
+                        style="background: transparent; border: 1px solid var(--glass-border); color: #fff;">Cancel</button>
+                </div>
+            </form>
+        </div>
         {% endif %}
-    </script>
-</body>
 
-</html>
+        <div style="margin-bottom: 0.5rem; opacity: 0.6; font-size: 0.85rem; text-align: right;">
+            {{ sol.byte_str }} | {{ sol.char_count }} chars
+        </div>
+
+        <pre><code class="language-{{ sol.prism_lang }}">{{ sol.code }}</code></pre>
+    </div>
+    {% endfor %}
+    {% else %}
+    <p style="opacity: 0.7;">No solutions archived yet.</p>
+    {% endif %}
+</div>
+
+{% if memo_content or is_admin %}
+<div class="glass-card">
+    <h2>Memo</h2>
+    <!-- Display Mode -->
+    {% if memo_content %}
+    <div id="memo-display"
+        style="padding: 1rem; background: rgba(0,0,0,0.2); border-radius: 8px; margin-bottom: 1rem; min-height: 50px;">
+        <!-- Rendered Markdown will go here -->
+    </div>
+    {% endif %}
+
+    <!-- Edit Mode (Admin Only) -->
+    {% if is_admin %}
+    <h3 style="margin-top: 2rem;">{% if memo_content %}Edit Memo{% else %}Add Memo{% endif %}</h3>
+    <form action="/problem/{{ problem.id }}/memo" method="post">
+        <textarea id="memo-editor" name="content">{{ memo_content }}</textarea>
+        <div style="text-align: right; margin-top: 1rem;">
+            <button type="submit" class="btn">Save Memo</button>
+        </div>
+    </form>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}
+
+{% block body_extra %}
+<!-- Hidden div to transfer data safely -->
+<div id="raw-memo-content" style="display:none;">{{ memo_content }}</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+{% if is_admin %}
+<script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
+{% endif %}
+
+<script>
+    // Tab Logic
+    function openTab(evt, tabId) {
+        var i, x, tablinks;
+        x = document.getElementsByClassName("code-viewer");
+        for (i = 0; i < x.length; i++) {
+            x[i].style.display = "none";
+        }
+        tablinks = document.getElementsByClassName("tab");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+        document.getElementById(tabId).style.display = "block";
+        evt.currentTarget.className += " active";
+    }
+
+    function toggleEdit(id) {
+        var x = document.getElementById(id);
+        if (x.style.display === "none") {
+            x.style.display = "block";
+        } else {
+            x.style.display = "none";
+        }
+    }
+
+    // Render Markdown for Display
+    const rawContent = document.getElementById('raw-memo-content').textContent;
+    if (document.getElementById('memo-display')) {
+        document.getElementById('memo-display').innerHTML = marked.parse(rawContent);
+    }
+
+    {% if is_admin %}
+    // Initialize EasyMDE
+    const easyMDE = new EasyMDE({ element: document.getElementById('memo-editor') });
+    {% endif %}
+</script>
+{% endblock %}

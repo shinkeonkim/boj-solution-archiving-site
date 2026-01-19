@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}BOJ Archive{% endblock %}</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    {% block head_extra %}{% endblock %}
+</head>
+
+<body {% block body_attr %}{% endblock %}>
+    <div class="container {% block container_class %}{% endblock %}">
+        {% block header %}
+        <header class="header">
+            <div>
+                <h1><a href="/" style="color: inherit; text-decoration: none;">BOJ Archive</a></h1>
+                <p>Archived solutions for singun11</p>
+                <div style="margin-top: 0.5rem;">
+                    <a href="/grass" class="btn"
+                        style="padding: 2px 8px; font-size: 0.8rem; background: rgba(3, 218, 198, 0.1); border: 1px solid var(--secondary-color); color: var(--secondary-color);">View
+                        Problem Grass</a>
+                </div>
+            </div>
+            <div style="display: flex; gap: 1rem; align-items: center;">
+                {% if is_admin %}
+                <span style="opacity: 0.7;">Welcome, Admin</span>
+                <form action="/admin/sync-titles" method="post" style="display: inline;">
+                    <button type="submit" class="btn"
+                        style="background: transparent; border: 1px solid var(--glass-border); color: var(--text-color); margin-right: 0.5rem; cursor: pointer;">Sync
+                        Titles</button>
+                </form>
+                <button class="btn" onclick="document.getElementById('upload-modal').style.display='flex'">Manual
+                    Upload</button>
+                <a href="/admin/logout" class="btn"
+                    style="background: transparent; border: 1px solid var(--glass-border); color: var(--text-color);">Logout</a>
+                {% else %}
+                <a href="/admin/login" style="opacity: 0.7; font-size: 0.9rem;">Admin Login</a>
+                {% endif %}
+            </div>
+        </header>
+        {% endblock %}
+
+        {% block content %}{% endblock %}
+    </div>
+
+    {% block body_extra %}{% endblock %}
+
+    {% block scripts %}{% endblock %}
+</body>
+
+</html>

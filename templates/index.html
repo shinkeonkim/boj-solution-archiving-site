@@ -1,182 +1,138 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BOJ Archive</title>
-    <link rel="stylesheet" href="/static/style.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-</head>
+{% block title %}BOJ Archive{% endblock %}
 
-<body>
-    <div class="container">
-        <header class="header">
-            <div>
-                <h1>BOJ Archive</h1>
-                <p>Archived solutions for singun11</p>
-                <div style="margin-top: 0.5rem;">
-                    <a href="/grass" class="btn"
-                        style="padding: 2px 8px; font-size: 0.8rem; background: rgba(3, 218, 198, 0.1); border: 1px solid var(--secondary-color); color: var(--secondary-color);">View
-                        Problem Grass</a>
-                </div>
-            </div>
-            <div style="display: flex; gap: 1rem; align-items: center;">
-                {% if is_admin %}
-                <span style="opacity: 0.7;">Welcome, Admin</span>
-                <form action="/admin/sync-titles" method="post" style="display: inline;">
-                    <button type="submit" class="btn"
-                        style="background: transparent; border: 1px solid var(--glass-border); color: var(--text-color); margin-right: 0.5rem; cursor: pointer;">Sync
-                        Titles</button>
-                </form>
-                <button class="btn" onclick="document.getElementById('upload-modal').style.display='flex'">Manual
-                    Upload</button>
-                <a href="/admin/logout" class="btn"
-                    style="background: transparent; border: 1px solid var(--glass-border); color: var(--text-color);">Logout</a>
-                {% else %}
-                <a href="/admin/login" style="opacity: 0.7; font-size: 0.9rem;">Admin Login</a>
-                {% endif %}
-            </div>
-        </header>
-
-        <!-- Search & Filters -->
-        <div class="glass-card" style="padding: 1rem; margin-bottom: 2rem;">
-            <form action="/" method="get" style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: center;">
-                <div style="flex: 1; min-width: 200px;">
-                    <input type="text" name="q" placeholder="Search ID or Title" value="{{ q if q }}" style="margin:0;">
-                </div>
-                <div style="flex: 0 0 auto;">
-                    <select name="lang"
-                        style="background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border); color: var(--text-color); padding: 0.5rem; border-radius: 8px;">
-                        <option value="">All Languages</option>
-                        {% for l in all_langs %}
-                        <option value="{{ l }}" {% if lang==l %}selected{% endif %}>{{ l }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div style="flex: 0 0 auto;">
-                    <select name="limit"
-                        style="background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border); color: var(--text-color); padding: 0.5rem; border-radius: 8px;">
-                        <option value="20" {% if limit==20 %}selected{% endif %}>20 per page</option>
-                        <option value="50" {% if limit==50 %}selected{% endif %}>50 per page</option>
-                        <option value="100" {% if limit==100 %}selected{% endif %}>100 per page</option>
-                    </select>
-                </div>
-                <button type="submit" class="btn">Search</button>
-                {% if q or lang %}
-                <a href="/" class="btn"
-                    style="background: transparent; border: 1px solid var(--glass-border); color: var(--text-color);">Clear</a>
-                {% endif %}
-            </form>
+{% block content %}
+<!-- Search & Filters -->
+<div class="glass-card" style="padding: 1rem; margin-bottom: 2rem;">
+    <form action="/" method="get" style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: center;">
+        <div style="flex: 1; min-width: 200px;">
+            <input type="text" name="q" placeholder="Search ID or Title" value="{{ q if q }}" style="margin:0;">
         </div>
-
-        <div class="glass-card">
-            <h2>Solved Problems</h2>
-            {% if problems %}
-            <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
-                <thead>
-                    <tr>
-                        <th style="text-align: left; padding: 1rem;">Problem</th>
-                        <th style="text-align: left; padding: 1rem;">Languages</th>
-                        <th style="text-align: right; padding: 1rem;">View</th>
-                        {% if is_admin %}
-                        <th style="text-align: right; padding: 1rem;">Admin</th>
-                        {% endif %}
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for p in problems %}
-                    <tr class="problem-row"
-                        style="border-bottom: 1px solid var(--glass-border); transition: background 0.2s;"
-                        onmouseover="this.style.background='rgba(255,255,255,0.05)'"
-                        onmouseout="this.style.background='transparent'">
-                        <td style="padding: 1rem;">
-                            <a href="https://www.acmicpc.net/problem/{{ p.id }}" target="_blank"
-                                style="color: var(--text-color); font-weight: 600; text-decoration: none; border-bottom: 1px dashed var(--glass-border);">
-                                {{ p.id }}번: {{ p.title }} &nearr;
-                            </a>
-                        </td>
-                        <td style="padding: 1rem;">
-                            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                                {% for sol in p.solutions %}
-                                <span style="background: var(--glass-border); padding: 2px 6px; border-radius: 4px;">{{
-                                    sol.language }}</span>
-                                {% endfor %}
-                            </div>
-                        </td>
-                        <td style="padding: 1rem; text-align: right;">
-                            <a href="/problem/{{ p.id }}" class="btn"
-                                style="padding: 4px 12px; font-size: 0.9rem;">View</a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-
-            <!-- Pagination -->
-            <div style="display: flex; justify-content: center; margin-top: 2rem; gap: 0.5rem; align-items: center;">
-                {% if page > 1 %}
-                <a href="/?page={{ page-1 }}&limit={{ limit }}&q={{ q or '' }}&lang={{ lang or '' }}" class="btn"
-                    style="background: transparent; border: 1px solid var(--glass-border); color: var(--text-color);">&larr;</a>
-                {% endif %}
-
-                {% for p in page_range %}
-                <a href="/?page={{ p }}&limit={{ limit }}&q={{ q or '' }}&lang={{ lang or '' }}" class="btn" style="
-                           {% if p == page %}
-                               background: var(--primary-color); border: 1px solid var(--primary-color);
-                           {% else %}
-                               background: transparent; border: 1px solid var(--glass-border); color: var(--text-color); opacity: 0.7;
-                           {% endif %}
-                           padding: 0.5rem 0.8rem;
-                       ">
-                    {{ p }}
-                </a>
+        <div style="flex: 0 0 auto;">
+            <select name="lang"
+                style="background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border); color: var(--text-color); padding: 0.5rem; border-radius: 8px;">
+                <option value="">All Languages</option>
+                {% for l in all_langs %}
+                <option value="{{ l }}" {% if lang==l %}selected{% endif %}>{{ l }}</option>
                 {% endfor %}
-
-                {% if page < total_pages %} <a
-                    href="/?page={{ page+1 }}&limit={{ limit }}&q={{ q or '' }}&lang={{ lang or '' }}" class="btn"
-                    style="background: transparent; border: 1px solid var(--glass-border); color: var(--text-color);">
-                    &rarr;</a>
-                    {% endif %}
-            </div>
-
-            {% else %}
-            <div style="text-align: center; padding: 3rem; opacity: 0.6;">
-                <p>No problems found.</p>
-            </div>
-            {% endif %}
+            </select>
         </div>
+        <div style="flex: 0 0 auto;">
+            <select name="limit"
+                style="background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border); color: var(--text-color); padding: 0.5rem; border-radius: 8px;">
+                <option value="20" {% if limit==20 %}selected{% endif %}>20 per page</option>
+                <option value="50" {% if limit==50 %}selected{% endif %}>50 per page</option>
+                <option value="100" {% if limit==100 %}selected{% endif %}>100 per page</option>
+            </select>
+        </div>
+        <button type="submit" class="btn">Search</button>
+        {% if q or lang %}
+        <a href="/" class="btn"
+            style="background: transparent; border: 1px solid var(--glass-border); color: var(--text-color);">Clear</a>
+        {% endif %}
+    </form>
+</div>
+
+<div class="glass-card">
+    <h2>Solved Problems</h2>
+    {% if problems %}
+    <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
+        <thead>
+            <tr>
+                <th style="text-align: left; padding: 1rem;">Problem</th>
+                <th style="text-align: left; padding: 1rem;">Languages</th>
+                <th style="text-align: right; padding: 1rem;">View</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in problems %}
+            <tr class="problem-row" style="border-bottom: 1px solid var(--glass-border); transition: background 0.2s;"
+                onmouseover="this.style.background='rgba(255,255,255,0.05)'"
+                onmouseout="this.style.background='transparent'">
+                <td style="padding: 1rem;">
+                    <a href="https://www.acmicpc.net/problem/{{ p.id }}" target="_blank"
+                        style="color: var(--text-color); font-weight: 600; text-decoration: none; border-bottom: 1px dashed var(--glass-border);">
+                        {{ p.id }}번: {{ p.title }} &nearr;
+                    </a>
+                </td>
+                <td style="padding: 1rem;">
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        {% for sol in p.solutions %}
+                        <span style="background: var(--glass-border); padding: 2px 6px; border-radius: 4px;">{{
+                            sol.language }}</span>
+                        {% endfor %}
+                    </div>
+                </td>
+                <td style="padding: 1rem; text-align: right;">
+                    <a href="/problem/{{ p.id }}" class="btn" style="padding: 4px 12px; font-size: 0.9rem;">View</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Pagination -->
+    <div style="display: flex; justify-content: center; margin-top: 2rem; gap: 0.5rem; align-items: center;">
+        {% if page > 1 %}
+        <a href="/?page={{ page-1 }}&limit={{ limit }}&q={{ q or '' }}&lang={{ lang or '' }}" class="btn"
+            style="background: transparent; border: 1px solid var(--glass-border); color: var(--text-color);">&larr;</a>
+        {% endif %}
+
+        {% for p in page_range %}
+        <a href="/?page={{ p }}&limit={{ limit }}&q={{ q or '' }}&lang={{ lang or '' }}" class="btn" style="
+                   {% if p == page %}
+                       background: var(--primary-color); border: 1px solid var(--primary-color);
+                   {% else %}
+                       background: transparent; border: 1px solid var(--glass-border); color: var(--text-color); opacity: 0.7;
+                   {% endif %}
+                   padding: 0.5rem 0.8rem;
+               ">
+            {{ p }}
+        </a>
+        {% endfor %}
+
+        {% if page < total_pages %} <a
+            href="/?page={{ page+1 }}&limit={{ limit }}&q={{ q or '' }}&lang={{ lang or '' }}" class="btn"
+            style="background: transparent; border: 1px solid var(--glass-border); color: var(--text-color);">
+            &rarr;</a>
+            {% endif %}
     </div>
 
-    <!-- Simple Modal for Upload (Manual Code Entry) -->
-    {% if is_admin %}
-    <div id="upload-modal"
-        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); align-items:center; justify-content:center; backdrop-filter:blur(5px); z-index:100;">
-        <div class="glass-card" style="width:500px; background: #1e1e1e;">
-            <h2>Manual Code Entry</h2>
-            <form action="/upload" method="post">
-                <label>Problem ID</label>
-                <input type="number" name="problem_id" required>
-
-                <label>Language</label>
-                <input type="text" name="language" placeholder="e.g. Python, C++, Java" required>
-
-                <label>Code Content</label>
-                <textarea name="code_content"
-                    style="min-height: 200px; font-family: monospace; width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border); color: var(--text-color); padding: 0.5rem; border-radius: 8px; margin-bottom: 1rem;"
-                    required placeholder="Paste your solution code here..."></textarea>
-
-                <div style="display:flex; gap:1rem; margin-top:1rem;">
-                    <button type="submit" class="btn">Save Solution</button>
-                    <button type="button" class="btn"
-                        onclick="document.getElementById('upload-modal').style.display='none'"
-                        style="background:transparent; border:1px solid var(--glass-border); color:#fff;">Cancel</button>
-                </div>
-            </form>
-        </div>
+    {% else %}
+    <div style="text-align: center; padding: 3rem; opacity: 0.6;">
+        <p>No problems found.</p>
     </div>
     {% endif %}
-</body>
+</div>
+{% endblock %}
 
-</html>
+{% block body_extra %}
+<!-- Simple Modal for Upload (Manual Code Entry) -->
+{% if is_admin %}
+<div id="upload-modal"
+    style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); align-items:center; justify-content:center; backdrop-filter:blur(5px); z-index:100;">
+    <div class="glass-card" style="width:500px; background: #1e1e1e;">
+        <h2>Manual Code Entry</h2>
+        <form action="/upload" method="post">
+            <label>Problem ID</label>
+            <input type="number" name="problem_id" required>
+
+            <label>Language</label>
+            <input type="text" name="language" placeholder="e.g. Python, C++, Java" required>
+
+            <label>Code Content</label>
+            <textarea name="code_content"
+                style="min-height: 200px; font-family: monospace; width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border); color: var(--text-color); padding: 0.5rem; border-radius: 8px; margin-bottom: 1rem;"
+                required placeholder="Paste your solution code here..."></textarea>
+
+            <div style="display:flex; gap:1rem; margin-top:1rem;">
+                <button type="submit" class="btn">Save Solution</button>
+                <button type="button" class="btn" onclick="document.getElementById('upload-modal').style.display='none'"
+                    style="background:transparent; border:1px solid var(--glass-border); color:#fff;">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
