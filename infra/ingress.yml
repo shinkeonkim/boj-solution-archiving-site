@@ -8,7 +8,17 @@ metadata:
     cert-manager.io/cluster-issuer: letsencrypt-prod
 spec:
   rules:
-    - host: "boj.xn--3e0b707e.kr"
+    - host: "boj.xn--hy1by51c.kr"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: boj-archive-service
+                port:
+                  number: 8000
+    - host: "xn--3h3b87u.xn--hy1by51c.kr"
       http:
         paths:
           - path: /
@@ -20,5 +30,6 @@ spec:
                   number: 8000
   tls:
     - hosts:
-        - "boj.xn--3e0b707e.kr"
+        - "boj.xn--hy1by51c.kr"
+        - "xn--3h3b87u.xn--hy1by51c.kr"
       secretName: boj-archive-tls
