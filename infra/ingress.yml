@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: boj-archive-ingress
+  namespace: boj-archive
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  rules:
+    - host: "boj.xn--3e0b707e.kr"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: boj-archive-service
+                port:
+                  number: 8000
+  tls:
+    - hosts:
+        - "boj.xn--3e0b707e.kr"
+      secretName: boj-archive-tls

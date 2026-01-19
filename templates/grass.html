@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Problem Grass - BOJ Archive</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        .container {
+            max-width: 1200px;
+        }
+
+        #tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            pointer-events: none;
+            display: none;
+            z-index: 1000;
+            border: 1px solid var(--primary-color);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header class="header">
+            <div>
+                <a href="/" style="font-size: 0.9rem; opacity: 0.7;">&larr; Back to List</a>
+                <h1 style="margin-top: 0.5rem; margin-bottom: 0;">Problem Grass</h1>
+                <p style="margin: 0; opacity: 0.8;">Visualization of Solved Problems (1000 ~ 40000)</p>
+            </div>
+
+            {% if is_admin %}
+            <div
+                style="background: rgba(187, 134, 252, 0.1); padding: 0.5rem 1rem; border-radius: 8px; border: 1px solid var(--primary-color);">
+                Admin Mode
+            </div>
+            {% endif %}
+        </header>
+
+        <div class="glass-card" style="padding: 1rem; overflow-x: auto;">
+            <canvas id="grassCanvas"></canvas>
+        </div>
+    </div>
+
+    <!-- Tooltip -->
+    <div id="tooltip"></div>
+
+    <script>
+        const solvedMap = {{ solved_map | tojson }};
+        const MIN_ID = 1000;
+        const MAX_ID = 40000;
+        const COLUMNS = 100; // Number of columns in the grid
+        const CELL_SIZE = 10;
+        const CELL_GAP = 2;
+        const TOTAL_WIDTH = COLUMNS * (CELL_SIZE + CELL_GAP);
+
+        // Calculate rows needed
+        const totalItems = MAX_ID - MIN_ID + 1;
+        const ROWS = Math.ceil(totalItems / COLUMNS);
+        const TOTAL_HEIGHT = ROWS * (CELL_SIZE + CELL_GAP);
+
+        const canvas = document.getElementById('grassCanvas');
+        const ctx = canvas.getContext('2d');
+        const tooltip = document.getElementById('tooltip');
+
+        // Set canvas size
+        canvas.width = TOTAL_WIDTH;
+        canvas.height = TOTAL_HEIGHT;
+        canvas.style.width = "100%"; // Responsive scaling in CSS
+        // canvas.style.maxWidth = TOTAL_WIDTH + "px"; // Optional limitation
+
+        // Colors
+        const COLOR_EMPTY = 'rgba(255, 255, 255, 0.05)';
+        const COLOR_SOLVED = '#03dac6'; // Teal for solved
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            for (let i = 0; i < totalItems; i++) {
+                const pid = MIN_ID + i;
+                const row = Math.floor(i / COLUMNS);
+                const col = i % COLUMNS;
+
+                const x = col * (CELL_SIZE + CELL_GAP);
+                const y = row * (CELL_SIZE + CELL_GAP);
+
+                ctx.fillStyle = solvedMap[pid] ? COLOR_SOLVED : COLOR_EMPTY;
+                ctx.fillRect(x, y, CELL_SIZE, CELL_SIZE);
+            }
+        }
+
+        // Handle Interactions
+        function getProblemFromCoords(x, y) {
+            // Adjust for CSS scaling if necessary (using getBoundingClientRect)
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+
+            const canvasX = (x - rect.left) * scaleX;
+            const canvasY = (y - rect.top) * scaleY;
+
+            const col = Math.floor(canvasX / (CELL_SIZE + CELL_GAP));
+            const row = Math.floor(canvasY / (CELL_SIZE + CELL_GAP));
+
+            if (col < 0 || col >= COLUMNS || row < 0 || row >= ROWS) return null;
+
+            const index = row * COLUMNS + col;
+            const pid = MIN_ID + index;
+
+            if (pid > MAX_ID) return null;
+
+            return pid;
+        }
+
+        canvas.addEventListener('mousemove', (e) => {
+            const pid = getProblemFromCoords(e.clientX, e.clientY);
+
+            if (pid) {
+                const title = solvedMap[pid];
+                tooltip.style.display = 'block';
+                tooltip.style.left = (e.pageX + 10) + 'px';
+                tooltip.style.top = (e.pageY + 10) + 'px';
+
+                if (title) {
+                    tooltip.innerHTML = `<strong>${pid}</strong><br>${title}`;
+                    canvas.style.cursor = 'pointer';
+                } else {
+                    tooltip.innerHTML = `<strong>${pid}</strong>`;
+                    canvas.style.cursor = 'default';
+                }
+            } else {
+                tooltip.style.display = 'none';
+                canvas.style.cursor = 'default';
+            }
+        });
+
+        canvas.addEventListener('click', (e) => {
+            const pid = getProblemFromCoords(e.clientX, e.clientY);
+            if (pid && solvedMap[pid]) {
+                window.location.href = `/problem/${pid}`;
+            }
+        });
+
+        canvas.addEventListener('mouseleave', () => {
+            tooltip.style.display = 'none';
+        });
+
+        draw();
+
+    </script>
+</body>
+
+</html>
