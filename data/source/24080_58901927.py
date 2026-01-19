@@ -1,0 +1,2 @@
+input()
+print("Yes" if len(set(list(input()))) >= 3 else  "No")

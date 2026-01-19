@@ -1,0 +1,12 @@
+with Ada.Text_IO; use Ada.Text_IO;
+with Ada.Integer_Text_IO; use Ada.Integer_Text_IO;
+procedure main is
+begin
+    put_line("Animal      Count");
+    put_line("-----------------");
+    put_line("Chickens      100");
+    put_line("Clydesdales     5");
+    put_line("Cows           40");
+    put_line("Goats          22");
+    put_line("Steers          2");
+end main;

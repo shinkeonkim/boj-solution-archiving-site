@@ -1,0 +1,1 @@
+for i in range(int(input())):L=list(map(int,input().split()));A=L[0];L=L[1:];L.sort();M=max([L[k+1]-L[k]for k in range(A-1)]);print("Class {}\nMax {}, Min {}, Largest gap {}".format(i+1,L[A-1],L[0],M))

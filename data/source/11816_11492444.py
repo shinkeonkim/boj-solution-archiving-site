@@ -1,0 +1,12 @@
+a=input()
+if(a[0]=="0"):
+    if(a[1]=="x"):
+        a=a[2:]
+        a=int(a,16)
+        print(a)
+    else:
+        a=a[1:]
+        a=int(a,8)
+        print(a)
+else:
+    print(a)

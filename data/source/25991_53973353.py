@@ -1,0 +1,1 @@
+input();print(sum([*map(lambda s:float(s)**3,input().split())])**(1/3))

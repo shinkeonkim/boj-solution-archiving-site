@@ -1,0 +1,1 @@
+print((lambda n:(n*(n+1))**2//4)(int(input())))

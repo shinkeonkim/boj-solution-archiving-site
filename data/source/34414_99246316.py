@@ -1,0 +1,1 @@
+print(all(int(input()) >= 48 for i in range(int(input()))))

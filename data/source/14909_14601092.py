@@ -1,0 +1,1 @@
+print([1 if i >0 else 0 for i in map(int,input().split())].count(1))

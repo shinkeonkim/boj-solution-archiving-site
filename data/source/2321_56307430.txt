@@ -1,0 +1,8 @@
+Program Test
+    Print "(A)", ",~"
+    print "(A)", "( 9> //)"
+    Print "(A)", " )(_///"
+    Print "(A)", "( \_>/"
+    Print "(A)", " \__/"
+    Print "(A)", "  ^^"
+End Program Test

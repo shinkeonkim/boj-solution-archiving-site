@@ -1,0 +1,1 @@
+print(max([len(set(list(input()))) for _ in range(int(input()))]))

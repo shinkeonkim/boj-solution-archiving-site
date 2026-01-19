@@ -1,0 +1,59 @@
+import sys
+from math import sqrt, pi, sin, factorial, ceil, floor
+from datetime import datetime, timedelta
+# sys.setrecursionlimit(10**7)
+
+BLANK = " "
+
+# inp = input
+inp = lambda : sys.stdin.readline().rstrip()
+mii = lambda x = BLANK : [*map(int,inp().split(x))]
+mfi = lambda x = BLANK : [*map(float,inp().split(x))]
+ii = lambda : int(inp())
+fi = lambda : float(inp())
+p = print
+def gcd(a, b): return gcd(b, a % b) if b > 0 else a
+def lcm(a, b): return a * b // gcd(a, b)
+
+
+def solve():
+	a = mii()
+	b = mii()
+
+	ans = 0
+
+	k1 = min(a[0], b[0])
+
+	ans += k1
+	a[0] -= k1
+	b[0] -= k1
+
+	k2 = min(a[1], b[1])
+
+	ans += k2
+	a[1] -= k2
+	b[1] -= k2
+
+	for i in range(2):
+		if a[i] > 0:
+			k = min(a[i], b[2])
+			ans += k
+			a[i] -= k
+			b[2] -= k
+
+		if b[i] > 0:
+			k = min(b[i], a[2])
+			ans += k
+			b[i] -= k
+			a[2] -= k
+
+	k3 = min(a[2], b[2])
+
+	ans += k3
+
+	p(ans)
+
+if __name__ == "__main__":
+	tc = 1
+	for t in range(1, tc+1):
+		ret = solve()

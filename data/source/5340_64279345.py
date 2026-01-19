@@ -1,0 +1,1 @@
+print("Latitude {}:{}:{}\nLongitude {}:{}:{}".format(*[len(input().strip())for i in range(6)]))

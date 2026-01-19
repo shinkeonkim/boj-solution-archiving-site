@@ -1,0 +1,14 @@
+#include <iostream>
+#include <algorithm>
+using namespace std;
+int N,ar[11000];
+int main()
+{
+	cin>>N;
+	for(int x=0; x<N; x++)cin>>ar[x];
+	if(prev_permutation(ar,ar+N))
+	{
+		for(int x=0; x<N; x++)cout<<ar[x]<<" ";
+	}
+	else cout<<"-1";
+}

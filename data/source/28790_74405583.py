@@ -1,0 +1,1 @@
+print("Johnny" if int(input()) % 2 else "Lorna")

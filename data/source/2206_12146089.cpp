@@ -1,0 +1,4 @@
+#include <bits/stdc++.h>
+#define Mx 987654321
+using namespace std;struct T{int Y,X,C,D;};int P,N,M,O[1100][1100],D[1100][1100][2],J[]={0,0,1,-1},H[]={1,-1,0,0},U,I,x,y,d;T Q,Z; queue <T> V;
+int main(){cin>>N>>M;for(y=0;y<N;y++) for(x=0;x<M;x++) scanf("%1d",&O[y][x]);for(y=0;y<N;y++)for(x=0;x<M;x++)D[y][x][0]=D[y][x][1]=Mx;Q.Y=Q.X=0;Q.D=1;Q.C=O[0][0];D[0][0][O[0][0]]=1;V.push(Q);while(!V.empty()){Z=V.front();V.pop();for(d=0;d<4;d++){U=Z.X+H[d];I=Z.Y+J[d];if(0<=U&&U<M&&0<=I&&I<N){if(O[I][U]==1&&Z.C==0&&D[I][U][1]>Z.D+1){D[I][U][1]=Z.D+1;Q.X=U;Q.Y=I;Q.C=1;Q.D=Z.D+1;V.push(Q);}else if(O[I][U]==0&&D[I][U][Z.C]>Z.D+1){D[I][U][Z.C]=Z.D+1;Q.X=U;Q.Y=I;Q.C=Z.C;Q.D=Z.D+1;V.push(Q);}}}}P=min(D[N-1][M-1][0],D[N-1][M-1][1]);cout<<(P==Mx?-1:P);}

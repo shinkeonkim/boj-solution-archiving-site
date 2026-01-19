@@ -1,0 +1,45 @@
+import sys
+from math import sqrt, pi, sin, factorial, ceil, floor
+from datetime import datetime, timedelta
+# sys.setrecursionlimit(10**7)
+
+BLANK = " "
+
+# inp = input
+inp = lambda : sys.stdin.readline().rstrip()
+mii = lambda x = BLANK : [*map(int,inp().split(x))]
+mfi = lambda x = BLANK : [*map(float,inp().split(x))]
+ii = lambda : int(inp())
+fi = lambda : float(inp())
+p = print
+def gcd(a, b): return gcd(b, a % b) if b > 0 else a
+def lcm(a, b): return a * b // gcd(a, b)
+
+def solve():
+	n = ii()
+	l = mii() # i번째 칸에 핀 꽃의 종류
+
+	for _ in range(ii()):
+		query = mii()
+
+		if query[0] == 1:
+			# l ~ r까지 꽃의 종류가 k인 꽃의 개수
+			left, right, k = query[1:]
+			ret = 0
+
+			for i in range(left, right + 1):
+				if l[i - 1] == k:
+					ret += 1
+			p(ret)
+		else:
+			# l ~ r까지 없앤다.
+			left, right = query[1:]
+
+			for i in range(left, right + 1):
+				l[i - 1] = -1
+
+
+if __name__ == "__main__":
+    tc = 1
+    for t in range(1, tc+1):
+        ret = solve()
