@@ -10,7 +10,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
-from sqlmodel import Session, select, func
+from sqlmodel import Session, select, func, or_, cast, String
 
 from database import engine, get_session, create_db_and_tables, Problem, Solution, Memo
 
@@ -100,13 +100,14 @@ async def read_root(
     if lang:
         query = query.join(Solution).where(Solution.language == lang).distinct()
         
-    # Filter by Search (Problem ID)
+    # Filter by Search (Problem ID or Title)
     if q:
-        try:
-            q_id = int(q)
-            query = query.where(Problem.id == q_id)
-        except ValueError:
-            pass # Ignore non-integer search for ID
+        query = query.where(
+            or_(
+                cast(Problem.id, String).contains(q),
+                Problem.title.contains(q)
+            )
+        )
             
     # Count total results (Simplified)
     results = session.exec(query).all()
