@@ -137,13 +137,12 @@
             tooltip.style.display = 'block';
             tooltip.style.left = (e.pageX + 10) + 'px';
             tooltip.style.top = (e.pageY + 10) + 'px';
+            canvas.style.cursor = 'pointer';
 
             if (title) {
                 tooltip.innerHTML = `<strong>${pid}</strong><br>${title}`;
-                canvas.style.cursor = 'pointer';
             } else {
-                tooltip.innerHTML = `<strong>${pid}</strong>`;
-                canvas.style.cursor = 'default';
+                tooltip.innerHTML = `<strong>${pid}</strong><br>아직 풀이가 없습니다.`;
             }
         } else {
             tooltip.style.display = 'none';
@@ -153,8 +152,12 @@
 
     canvas.addEventListener('click', (e) => {
         const pid = getProblemFromCoords(e.clientX, e.clientY);
-        if (pid && solvedMap[pid]) {
-            window.location.href = `/problem/${pid}`;
+        if (pid) {
+            if (solvedMap[pid]) {
+                window.location.href = `/problem/${pid}`;
+            } else {
+                window.open(`https://www.acmicpc.net/problem/${pid}`, '_blank');
+            }
         }
     });
 
