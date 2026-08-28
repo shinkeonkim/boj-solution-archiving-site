@@ -31,9 +31,14 @@ spec:
           command: ["sh", "-c"]
           args:
             - |
+              set -e
               rm -f /app/boj.db
-              ln -s /app/db-data/boj.db /app/boj.db
+              # 예전 subPath 마운트 시도 때 K8s가 이 경로를 디렉터리로 자동 생성해 둔
+              # 적이 있다(실제로 겪음) — touch는 디렉터리에도 조용히 성공해버려서
+              # SQLite가 "파일이 아님"으로 뒤늦게 실패한다. 매번 방어적으로 확인한다.
+              if [ -d /app/db-data/boj.db ]; then rmdir /app/db-data/boj.db; fi
               touch /app/db-data/boj.db
+              ln -s /app/db-data/boj.db /app/boj.db
               exec uv run uvicorn main:app --host 0.0.0.0 --port 8899
           ports:
             - containerPort: {{ .Values.containerPort }}
