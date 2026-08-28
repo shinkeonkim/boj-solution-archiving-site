@@ -1,7 +1,13 @@
-# database.py hardcodes sqlite:///boj.db (relative to /app) with no path override,
-# so the db PVC is mounted at the exact file path via subPath rather than as a
-# directory — replicas MUST stay at 1 (SQLite single-writer) with Recreate so two
-# pods never open the same file at once during a rollout.
+# database.py hardcodes sqlite:///boj.db (relative to /app) with no path override.
+# The image bakes in a committed boj.db FILE (dev artifact, from `COPY . .`) — if the
+# db PVC is mounted at that exact path via subPath, Kubernetes auto-creates the
+# missing subPath as a DIRECTORY on a fresh/empty PVC, which then can't bind-mount
+# over the file baked into the image ("not a directory", actually hit this on the
+# live cluster). So instead the PVC is mounted as a plain directory and a symlink is
+# set up at container start — no subPath involved at all.
+#
+# replicas MUST stay at 1 (SQLite single-writer) with Recreate so two pods never
+# open the same file at once during a rollout.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -22,6 +28,13 @@ spec:
         - name: web
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["sh", "-c"]
+          args:
+            - |
+              rm -f /app/boj.db
+              ln -s /app/db-data/boj.db /app/boj.db
+              touch /app/db-data/boj.db
+              exec uv run uvicorn main:app --host 0.0.0.0 --port 8899
           ports:
             - containerPort: {{ .Values.containerPort }}
           envFrom:
@@ -30,8 +43,7 @@ spec:
                 optional: true
           volumeMounts:
             - name: db
-              mountPath: /app/boj.db
-              subPath: boj.db
+              mountPath: /app/db-data
             - name: data
               mountPath: /app/data
       volumes:
