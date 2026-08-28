@@ -1,0 +1,43 @@
+# database.py hardcodes sqlite:///boj.db (relative to /app) with no path override,
+# so the db PVC is mounted at the exact file path via subPath rather than as a
+# directory — replicas MUST stay at 1 (SQLite single-writer) with Recreate so two
+# pods never open the same file at once during a rollout.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.fullnameOverride }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: {{ .Values.fullnameOverride }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.fullnameOverride }}
+    spec:
+      containers:
+        - name: web
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.containerPort }}
+          envFrom:
+            - secretRef:
+                name: {{ .Values.secretName }}
+                optional: true
+          volumeMounts:
+            - name: db
+              mountPath: /app/boj.db
+              subPath: boj.db
+            - name: data
+              mountPath: /app/data
+      volumes:
+        - name: db
+          persistentVolumeClaim:
+            claimName: {{ .Values.fullnameOverride }}-db
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ .Values.fullnameOverride }}-data

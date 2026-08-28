@@ -1,0 +1,6 @@
+apiVersion: v2
+name: boj-archive
+description: BOJ solution archiving site (FastAPI + SQLite)
+type: application
+version: 0.1.0
+appVersion: "latest"
