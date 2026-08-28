@@ -28,4 +28,7 @@ persistence:
 domain: boj.xn--hy1by51c.kr
 
 ingress:
-  clusterIssuer: letsencrypt-prod
+  # 실제 클러스터의 ClusterIssuer 이름은 letsencrypt-prod가 아니라 cloudflare-dns01이다
+  # (kubectl get clusterissuer로 확인, 2026-08-28) — 잘못된 이름으로 62분째 인증서
+  # 발급이 멈춰 있었다.
+  clusterIssuer: cloudflare-dns01
