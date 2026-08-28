@@ -1,0 +1,28 @@
+fullnameOverride: boj-archive
+
+image:
+  repository: ghcr.io/shinkeonkim/boj-archive
+  tag: latest
+  pullPolicy: Always
+
+containerPort: 8899
+
+# main.py reads ADMIN_PASSWORD / SECRET_KEY from the environment (falls back to
+# insecure defaults otherwise) — this chart never sets real values, it only
+# wires a Secret name. The homelab GitOps repo supplies the actual Secret via
+# SOPS, same pattern as aws-study-site's jwtSecretName.
+secretName: boj-archive-secrets
+
+# SQLite is single-writer — this must stay at 1 replica with Recreate strategy,
+# same constraint url-shortener's chart documents for its own SQLite file.
+replicaCount: 1
+
+persistence:
+  storageClass: longhorn
+  dbSize: 1Gi
+  dataSize: 5Gi
+
+domain: boj.xn--hy1by51c.kr
+
+ingress:
+  clusterIssuer: letsencrypt-prod
