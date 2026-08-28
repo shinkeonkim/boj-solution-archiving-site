@@ -18,7 +18,10 @@ secretName: boj-archive-secrets
 replicaCount: 1
 
 persistence:
-  storageClass: longhorn
+  # 이 클러스터는 노드 3대뿐이라 기본 longhorn(replica 2)이 여유 공간 부족으로
+  # "insufficient storage"를 내며 스케줄링에 실패했다(실제로 겪음, 2026-08-28) —
+  # SQLite 단일 파일이라 어차피 복제 여러 개가 필요 없어서 longhorn-r1(replica 1)로.
+  storageClass: longhorn-r1
   dbSize: 1Gi
   dataSize: 5Gi
 
